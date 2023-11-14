@@ -47,7 +47,7 @@ def main():
         
 
     # Time limit (in seconds)
-    time_limit = 30
+    time_limit = 120
 
     elapsed_time = time.time() - st.session_state.start_time
 
