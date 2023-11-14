@@ -29,12 +29,17 @@ def main():
     st.title("Mental Math For Traders")
 
     # Initialize session state
+
     if 'start_time' not in st.session_state:
         st.session_state.start_time = time.time()
+    if 'question_start_time' not in st.session_state:
+        st.session_state.question_start_time = st.session_state.start_time
     if 'correct_count' not in st.session_state:
         st.session_state.correct_count = 0
     if 'correct_answers_by_type' not in st.session_state:
         st.session_state.correct_answers_by_type = {'integer': 0, 'decimal': 0}
+    if 'answer_times' not in st.session_state:
+        st.session_state.answer_times = []
     if 'question' not in st.session_state:
         st.session_state.question, st.session_state.correct_answer, st.session_state.question_type = generate_question()
     if 'last_answer' not in st.session_state:
@@ -62,6 +67,8 @@ def main():
         # Display results in a chart
         df = pd.DataFrame(list(st.session_state.correct_answers_by_type.items()), columns=['Question Type', 'Correct Answers'])
         st.bar_chart(df.set_index('Question Type'))
+        if st.session_state.answer_times:
+            st.line_chart(st.session_state.answer_times)
         st.stop()
 
     # Input for the answer
@@ -76,6 +83,8 @@ def main():
                 st.session_state.correct_count += 1
                 st.session_state.correct_answers_by_type[st.session_state.question_type] += 1
                 st.session_state.new_question = True
+                time_taken = time.time() - st.session_state.question_start_time
+                st.session_state.answer_times.append(time_taken)
             elif user_answer_float != st.session_state.last_answer:
                 st.error(f"Incorrect. Try again!")
             st.session_state.last_answer = user_answer_float
@@ -86,7 +95,9 @@ def main():
     if st.session_state.new_question:
         st.session_state.question, st.session_state.correct_answer, st.session_state.question_type = generate_question()
         st.session_state.input_key += 1  # Increment the input key
+        st.session_state.question_start_time = time.time()
         st.session_state.new_question = False
+        
         st.experimental_rerun()
 
 if __name__ == "__main__":
